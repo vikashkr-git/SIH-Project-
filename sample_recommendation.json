@@ -1,0 +1,554 @@
+{
+  "query_summary": {
+    "commodity": "Tomato",
+    "category": "Fresh Produce",
+    "storage_type": "Chilled",
+    "transportation": "Refrigerated",
+    "target_shelf_life_days": 14,
+    "optimization_goal": "Balanced"
+  },
+  "scientific_requirements": {
+    "commodity": "Tomato",
+    "category": "Fresh Produce",
+    "is_fresh_produce": true,
+    "is_frozen": false,
+    "is_chilled": true,
+    "is_long_transit": false,
+    "water_activity_aw_estimated": 0.974,
+    "vapor_pressure_delta_kpa": 0.103,
+    "oxidation_risk_index": 0.001,
+    "target_wvtr_range": {
+      "min": 8.0,
+      "max": 25.0,
+      "unit": "g/(m2*day)"
+    },
+    "wvtr_class_demand": "Moderate / Breathable",
+    "moisture_risk_analysis": "Condensation & mold if hermetic; shriveling if too porous",
+    "target_otr_range": {
+      "min": 3000.0,
+      "max": 15000.0,
+      "unit": "cm3/(m2*day*atm)"
+    },
+    "otr_class_demand": "High Gas Permeability (Aerobic Maintenance)",
+    "oxygen_risk_analysis": "Anaerobic fermentation and ethanol production if oxygen blocked",
+    "thermal_mechanical_demands": {
+      "min_operating_temp_c": 7.0,
+      "required_puncture_n": 12.0,
+      "required_tensile_mpa": 20.0,
+      "thermal_risk": "Chilled storage (12.0\u00b0C) requires moisture-resistant barrier and anti-fog performance"
+    },
+    "map_recommendations": {
+      "active_mode": true,
+      "respiration_severity": "Moderate",
+      "respiration_rate_mg_co2_kg_hr": 18.5,
+      "breathable_packaging_required": true,
+      "micro_perforation_recommended": true,
+      "recommended_headspace_gas": "3-5% O2, 3-5% CO2, balance N2",
+      "anaerobic_compensation_threshold_o2": 1.5,
+      "co2_injury_threshold_pct": 10.0,
+      "scientific_rationale": "Living produce continues respiration consuming O2 and releasing CO2 (18.5 mg CO2/kg-hr). Hermetic barrier films without micro-perforations cause rapid anaerobiosis (<1% O2), triggering ethanol off-flavor and tissue breakdown."
+    },
+    "disqualification_criteria": {
+      "disallow_non_breathable_for_produce": true,
+      "disallow_brittle_films_for_frozen": false,
+      "min_operational_temp_c": 7.0,
+      "min_puncture_n": 12.0,
+      "min_tensile_mpa": 20.0
+    }
+  },
+  "top_recommendations": [
+    {
+      "rank": 1,
+      "id": "PKG_BREATHABLE_PE",
+      "short_name": "Breathable_PE",
+      "name": "Breathable Microporous PE Film",
+      "structure": "Calcium carbonate filled extruded PE stretched to create sub-micron breathability",
+      "category": "Controlled Permeability",
+      "suitability_score": 92.1,
+      "sample_photo_url": "/packaging/micro_perf_produce.jpg",
+      "technical_specifications": {
+        "thickness_um": 32.0,
+        "otr_value": 6200.0,
+        "otr_unit": "cm3/(m2*day*atm)",
+        "otr_class": "High Breathability",
+        "wvtr_value": 18.0,
+        "wvtr_unit": "g/(m2*day)",
+        "wvtr_class": "Moderate",
+        "co2_permeability": 7400.0,
+        "puncture_resistance_n": 12.0,
+        "tensile_strength_mpa": 24.0,
+        "sealing_temp_range_c": "108 - 132\u00b0C",
+        "seal_strength_n_15mm": 19.0,
+        "min_temperature_c": 2.0,
+        "breathable": true,
+        "micro_perforated": false,
+        "map_suitable": true,
+        "light_barrier": "Translucent"
+      },
+      "sustainability_profile": {
+        "recyclability_class": "Good",
+        "recyclability_stream": "Code 4 (LDPE)",
+        "recycled_content_pct": 0.0,
+        "biodegradable": false,
+        "compostable": false,
+        "bio_based_pct": 0.0,
+        "relative_cost_index": 1.2
+      },
+      "scientific_provenance": {
+        "source_ref": "SRC_KADER_2002",
+        "astm_standard": "ASTM D3985",
+        "doi": "10.3733/ucanr.3311"
+      },
+      "material_composition": {
+        "layers": [
+          {
+            "layer_no": 1,
+            "position": "Outer Layer",
+            "name": "Breathable Microporous PE Film",
+            "thickness_um": 12.8,
+            "function": "Structural Integrity & Printability",
+            "work": "Provides protective exterior barrier and mechanical stability."
+          },
+          {
+            "layer_no": 2,
+            "position": "Inner Sealant Layer",
+            "name": "Polyethylene Sealant",
+            "thickness_um": 19.2,
+            "function": "Hermetic Fusion Sealing",
+            "work": "Fuses under heat to seal in food freshness and prevent vapor transmission."
+          }
+        ],
+        "why_this_material_short": "Microporous polyethylene permits controlled oxygen transfer for moderate respiration produce without letting liquid water escape."
+      },
+      "procurement_market": {
+        "estimated_cost_per_kg_inr": "\u20b9230 \u2013 \u20b9310 / kg",
+        "estimated_cost_per_pouch_inr": "\u20b91.10 \u2013 \u20b92.10 / bag",
+        "approx_cost_usd": "$2.75 \u2013 $3.70 / kg",
+        "moq": "1,500 units / 200 kg",
+        "lead_time": "3\u20135 days (Stock) | 12\u201315 days (Custom)",
+        "sourcing_channels": [
+          "IndiaMART B2B Marketplace",
+          "TradeIndia B2B Portal",
+          "Local Regional Industrial Packaging Clusters"
+        ]
+      },
+      "quality_inspection_checklist": [
+        {
+          "check_item": "Visual Pinhole & Defect Inspection",
+          "standard": "IS 1060 / ASTM F392",
+          "acceptance_criteria": "Zero visible pinholes, cracks, or web wrinkles under bright light inspection.",
+          "how_to_test": "Visual light table check across web width.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Gauge & Thickness Micrometer Check",
+          "standard": "IS 2508 / ASTM D6988",
+          "acceptance_criteria": "Total thickness: 32\u00b5m \u00b1 5%.",
+          "how_to_test": "Calibrated digital micrometer at 5 locations.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Heat Seal Strength Integrity",
+          "standard": "ASTM F88",
+          "acceptance_criteria": "Seal strength \u2265 19.0 N/15mm without leaks.",
+          "how_to_test": "Tensiometer pull across seal joint.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Solvent Odor Organoleptic Check",
+          "standard": "IS 9845",
+          "acceptance_criteria": "Zero chemical/solvent odor taint inside packaging.",
+          "how_to_test": "Headspace sniff test upon package opening.",
+          "criticality": "Critical"
+        }
+      ],
+      "material_durability": {
+        "virgin_material_shelf_life": "18 Months in dry warehouse conditions (15\u201328\u00b0C, RH < 65%)",
+        "packaged_product_protection_duration": "Guarantees preservation of Tomato quality, lipid freshness, and aroma for up to 120 Days under Chilled conditions.",
+        "unfilled_storage_conditions": "Clean, dry warehouse, elevated on wooden pallets away from direct damp walls.",
+        "aging_failure_modes": "Surface tension drop affecting seal strength and potential polymer oxidation."
+      },
+      "explanation": {
+        "reasons_why": [
+          "Breathable polymer matrix allows equilibrium headspace gas exchange matching produce respiration rate.",
+          "Moisture transmission rate (18.0 g/m2/day) mitigates internal condensation droplets without excessive moisture loss.",
+          "Compatible with municipal mono-material recycling (Code 4 (LDPE))."
+        ],
+        "cautions_limitations": [],
+        "radar_metrics": {
+          "oxygen_barrier": 100.0,
+          "moisture_barrier": 100.0,
+          "mechanical_strength": 100.0,
+          "thermal_stability": 100.0,
+          "sustainability": 55.0,
+          "cost_efficiency": 90.0
+        },
+        "suitability_score": 92.1,
+        "is_top_choice": true
+      }
+    },
+    {
+      "rank": 2,
+      "id": "PKG_BREATHABLE_PP",
+      "short_name": "Breathable_PP",
+      "name": "Perforated Breathable Polypropylene",
+      "structure": "Anti-fog treated oriented Polypropylene (OPP) with macro/micro vent patterns",
+      "category": "Controlled Permeability",
+      "suitability_score": 90.1,
+      "sample_photo_url": "/packaging/micro_perf_produce.jpg",
+      "technical_specifications": {
+        "thickness_um": 28.0,
+        "otr_value": 9800.0,
+        "otr_unit": "cm3/(m2*day*atm)",
+        "otr_class": "Very High Permeability",
+        "wvtr_value": 12.0,
+        "wvtr_unit": "g/(m2*day)",
+        "wvtr_class": "Moderate",
+        "co2_permeability": 11000.0,
+        "puncture_resistance_n": 18.0,
+        "tensile_strength_mpa": 130.0,
+        "sealing_temp_range_c": "120 - 140\u00b0C",
+        "seal_strength_n_15mm": 20.0,
+        "min_temperature_c": 5.0,
+        "breathable": true,
+        "micro_perforated": true,
+        "map_suitable": false,
+        "light_barrier": "Ultra Clear Optical Grade"
+      },
+      "sustainability_profile": {
+        "recyclability_class": "High (Mono-material PP)",
+        "recyclability_stream": "Code 5 (PP - Highly Recyclable)",
+        "recycled_content_pct": 0.0,
+        "biodegradable": false,
+        "compostable": false,
+        "bio_based_pct": 0.0,
+        "relative_cost_index": 1.1
+      },
+      "scientific_provenance": {
+        "source_ref": "SRC_KADER_2002",
+        "astm_standard": "ASTM D882",
+        "doi": "10.3733/ucanr.3311"
+      },
+      "material_composition": {
+        "layers": [
+          {
+            "layer_no": 1,
+            "position": "Outer Layer",
+            "name": "Anti-fog treated oriented Polypropylene (OPP) with macro",
+            "thickness_um": 11.2,
+            "function": "Structural Integrity & Printability",
+            "work": "Provides protective exterior barrier and mechanical stability."
+          },
+          {
+            "layer_no": 2,
+            "position": "Inner Sealant Layer",
+            "name": "micro vent patterns",
+            "thickness_um": 16.8,
+            "function": "Hermetic Fusion Sealing",
+            "work": "Fuses under heat to seal in food freshness and prevent vapor transmission."
+          }
+        ],
+        "why_this_material_short": "Perforated polypropylene offers sparkling optical clarity for fresh cut salads while allowing respiration gases to diffuse rapidly."
+      },
+      "procurement_market": {
+        "estimated_cost_per_kg_inr": "\u20b9240 \u2013 \u20b9320 / kg",
+        "estimated_cost_per_pouch_inr": "\u20b91.20 \u2013 \u20b92.20 / bag",
+        "approx_cost_usd": "$2.90 \u2013 $3.85 / kg",
+        "moq": "1,500 units / 200 kg",
+        "lead_time": "3\u20135 days (Stock) | 12\u201315 days (Custom)",
+        "sourcing_channels": [
+          "IndiaMART B2B Marketplace",
+          "TradeIndia B2B Portal",
+          "Local Regional Industrial Packaging Clusters"
+        ]
+      },
+      "quality_inspection_checklist": [
+        {
+          "check_item": "Visual Pinhole & Defect Inspection",
+          "standard": "IS 1060 / ASTM F392",
+          "acceptance_criteria": "Zero visible pinholes, cracks, or web wrinkles under bright light inspection.",
+          "how_to_test": "Visual light table check across web width.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Gauge & Thickness Micrometer Check",
+          "standard": "IS 2508 / ASTM D6988",
+          "acceptance_criteria": "Total thickness: 28\u00b5m \u00b1 5%.",
+          "how_to_test": "Calibrated digital micrometer at 5 locations.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Heat Seal Strength Integrity",
+          "standard": "ASTM F88",
+          "acceptance_criteria": "Seal strength \u2265 20.0 N/15mm without leaks.",
+          "how_to_test": "Tensiometer pull across seal joint.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Solvent Odor Organoleptic Check",
+          "standard": "IS 9845",
+          "acceptance_criteria": "Zero chemical/solvent odor taint inside packaging.",
+          "how_to_test": "Headspace sniff test upon package opening.",
+          "criticality": "Critical"
+        }
+      ],
+      "material_durability": {
+        "virgin_material_shelf_life": "18 Months in dry warehouse conditions (15\u201328\u00b0C, RH < 65%)",
+        "packaged_product_protection_duration": "Guarantees preservation of Tomato quality, lipid freshness, and aroma for up to 120 Days under Chilled conditions.",
+        "unfilled_storage_conditions": "Clean, dry warehouse, elevated on wooden pallets away from direct damp walls.",
+        "aging_failure_modes": "Surface tension drop affecting seal strength and potential polymer oxidation."
+      },
+      "explanation": {
+        "reasons_why": [
+          "Engineered laser micro-perforations permit controlled O2/CO2 flux, preventing anaerobic fermentation.",
+          "Moisture transmission rate (12.0 g/m2/day) mitigates internal condensation droplets without excessive moisture loss.",
+          "Compatible with municipal mono-material recycling (Code 5 (PP - Highly Recyclable))."
+        ],
+        "cautions_limitations": [],
+        "radar_metrics": {
+          "oxygen_barrier": 100.0,
+          "moisture_barrier": 100.0,
+          "mechanical_strength": 100.0,
+          "thermal_stability": 100.0,
+          "sustainability": 55.0,
+          "cost_efficiency": 95.0
+        },
+        "suitability_score": 90.1,
+        "is_top_choice": false
+      }
+    },
+    {
+      "rank": 3,
+      "id": "PKG_MICRO_PERF_PE",
+      "short_name": "Micro_Perforated_PE",
+      "name": "Micro-Perforated LDPE Produce Film",
+      "structure": "LLDPE / LDPE Blend with precision laser micro-perforations (90-120\u00b5m pores)",
+      "category": "Controlled Permeability / Active Produce",
+      "suitability_score": 88.7,
+      "sample_photo_url": "/packaging/micro_perf_produce.jpg",
+      "technical_specifications": {
+        "thickness_um": 35.0,
+        "otr_value": 8500.0,
+        "otr_unit": "cm3/(m2*day*atm)",
+        "otr_class": "Very High / Tailored Respiration",
+        "wvtr_value": 14.5,
+        "wvtr_unit": "g/(m2*day)",
+        "wvtr_class": "Moderate Barrier",
+        "co2_permeability": 9200.0,
+        "puncture_resistance_n": 14.0,
+        "tensile_strength_mpa": 28.0,
+        "sealing_temp_range_c": "105 - 130\u00b0C",
+        "seal_strength_n_15mm": 22.0,
+        "min_temperature_c": 0.0,
+        "breathable": true,
+        "micro_perforated": true,
+        "map_suitable": true,
+        "light_barrier": "Transparent (High clarity for retail produce inspection)"
+      },
+      "sustainability_profile": {
+        "recyclability_class": "High (Mono-material Polyethylene stream)",
+        "recyclability_stream": "Code 4 (LDPE - Recyclable)",
+        "recycled_content_pct": 0.0,
+        "biodegradable": false,
+        "compostable": false,
+        "bio_based_pct": 0.0,
+        "relative_cost_index": 1.15
+      },
+      "scientific_provenance": {
+        "source_ref": "SRC_KADER_2002",
+        "astm_standard": "ASTM D3985 / ASTM F1249",
+        "doi": "10.3733/ucanr.3311"
+      },
+      "material_composition": {
+        "layers": [
+          {
+            "layer_no": 1,
+            "position": "Base Film",
+            "name": "Low-Density Polyethylene with Anti-Fog Masterbatch",
+            "thickness_um": 35.0,
+            "function": "Clarity & Condensation Dissipation",
+            "work": "Incorporates food-grade non-ionic surfactants that spread moisture into a continuous invisible water sheet, preventing light-scattering droplet fogging."
+          },
+          {
+            "layer_no": 2,
+            "position": "Perforation Matrix",
+            "name": "Precision Laser Micro-Perforations (80\u2013120\u00b5m)",
+            "thickness_um": 0.0,
+            "function": "Equilibrium Respiration Gas Exchange",
+            "work": "Calculated hole density regulates O2 ingress and CO2 egress to match produce respiration kinetics, maintaining 3\u20135% O2 to prevent anaerobic fermentation."
+          }
+        ],
+        "why_this_material_short": "Living produce consumes oxygen and exhales carbon dioxide. Solid plastic suffocates fresh produce within 48 hours, causing anaerobic rotting. Laser micro-perforations maintain an optimal equilibrium atmosphere (3-5% O2, 5-8% CO2) while preventing water condensation droplets via anti-fog additives."
+      },
+      "procurement_market": {
+        "estimated_cost_per_kg_inr": "\u20b9210 \u2013 \u20b9290 / kg",
+        "estimated_cost_per_pouch_inr": "\u20b90.90 \u2013 \u20b91.80 / bag (Produce zipper bag)",
+        "approx_cost_usd": "$2.50 \u2013 $3.50 / kg",
+        "moq": "2,500 bags (Stock) | 200 kg (Rolls)",
+        "lead_time": "2\u20134 days (Stock) | 10\u201314 days (Laser Perforation Custom)",
+        "sourcing_channels": [
+          "IndiaMART Agro-Packaging Wholesalers",
+          "FPO & Horticulture Packaging Hubs (Nashik, Pune, Bangalore, Himachal)",
+          "TradeIndia Produce Packaging"
+        ]
+      },
+      "quality_inspection_checklist": [
+        {
+          "check_item": "Laser Micro-Hole Inspection & Count",
+          "standard": "Optical Microscopy 50x",
+          "acceptance_criteria": "Laser micro-holes cleanly circular (80\u2013120\u00b5m diameter) with zero thermal burn slag, clogging, or tears.",
+          "how_to_test": "Examine under 50x portable optical loupe or digital microscope.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Anti-Fog Efficacy Hot/Cold Test",
+          "standard": "ASTM D1003 modified (Hot Fog)",
+          "acceptance_criteria": "Water vapor forms a transparent film within 3 minutes over 60\u00b0C water bath with zero droplet beads.",
+          "how_to_test": "Place film sheet over a 60\u00b0C warm water beaker in a cold room; check for transparency vs fogging.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Produce Respiration Breathability (OTR)",
+          "standard": "ASTM D3985 / ISO 15105",
+          "acceptance_criteria": "Equilibrium OTR > 2,000 cm\u00b3/(m\u00b2\u00b7day\u00b7atm) to prevent anaerobic produce souring.",
+          "how_to_test": "Review laser perforation specification sheet from converter.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Micro-Hole Tear Propagation Resistance",
+          "standard": "ASTM D1922",
+          "acceptance_criteria": "Perforations must not tear or run when film is pulled diagonally by hand.",
+          "how_to_test": "Manual tensile pull across hole line.",
+          "criticality": "Critical"
+        },
+        {
+          "check_item": "Direct Food Contact Purity",
+          "standard": "IS 9845",
+          "acceptance_criteria": "Food-grade certification for anti-fog surfactant masterbatch.",
+          "how_to_test": "Supplier certificate of analysis.",
+          "criticality": "Major"
+        }
+      ],
+      "material_durability": {
+        "virgin_material_shelf_life": "12 \u2013 18 Months (anti-fog additive migrates; use within 12 months for peak anti-fog performance)",
+        "packaged_product_protection_duration": "Guarantees preservation of Tomato quality, lipid freshness, and aroma for up to 120 Days under Chilled conditions.",
+        "unfilled_storage_conditions": "Cool, dry storage below 30\u00b0C; protect from dust and airborne particles that could clog micro-perforations.",
+        "aging_failure_modes": "Depletion of anti-fog surfactant bloom leading to condensation fogging inside bags."
+      },
+      "explanation": {
+        "reasons_why": [
+          "Engineered laser micro-perforations permit controlled O2/CO2 flux, preventing anaerobic fermentation.",
+          "Moisture transmission rate (14.5 g/m2/day) mitigates internal condensation droplets without excessive moisture loss.",
+          "Compatible with municipal mono-material recycling (Code 4 (LDPE - Recyclable))."
+        ],
+        "cautions_limitations": [],
+        "radar_metrics": {
+          "oxygen_barrier": 100.0,
+          "moisture_barrier": 100.0,
+          "mechanical_strength": 100.0,
+          "thermal_stability": 100.0,
+          "sustainability": 55.0,
+          "cost_efficiency": 92.5
+        },
+        "suitability_score": 88.7,
+        "is_top_choice": false
+      }
+    }
+  ],
+  "sustainable_alternative": {
+    "id": "PKG_BREATHABLE_PP",
+    "name": "Perforated Breathable Polypropylene",
+    "short_name": "Breathable_PP",
+    "structure": "Anti-fog treated oriented Polypropylene (OPP) with macro/micro vent patterns",
+    "sample_photo_url": "/packaging/micro_perf_produce.jpg",
+    "suitability_score": 90.1,
+    "eco_highlights": {
+      "bio_based_pct": 0,
+      "recycled_content_pct": 0,
+      "recyclability_stream": "Code 5 (PP - Highly Recyclable)",
+      "compostable": false
+    },
+    "trade_off_analysis": "Offers enhanced environmental profile (Code 5 (PP - Highly Recyclable)) with 90.1/100 suitability. Trade-off: WVTR (12.0 g/m2/day) vs Top Pick (18.0 g/m2/day).",
+    "material_composition": {
+      "layers": [
+        {
+          "layer_no": 1,
+          "position": "Outer Layer",
+          "name": "Anti-fog treated oriented Polypropylene (OPP) with macro",
+          "thickness_um": 11.2,
+          "function": "Structural Integrity & Printability",
+          "work": "Provides protective exterior barrier and mechanical stability."
+        },
+        {
+          "layer_no": 2,
+          "position": "Inner Sealant Layer",
+          "name": "micro vent patterns",
+          "thickness_um": 16.8,
+          "function": "Hermetic Fusion Sealing",
+          "work": "Fuses under heat to seal in food freshness and prevent vapor transmission."
+        }
+      ],
+      "why_this_material_short": "Perforated polypropylene offers sparkling optical clarity for fresh cut salads while allowing respiration gases to diffuse rapidly."
+    },
+    "procurement_market": {
+      "estimated_cost_per_kg_inr": "\u20b9240 \u2013 \u20b9320 / kg",
+      "estimated_cost_per_pouch_inr": "\u20b91.20 \u2013 \u20b92.20 / bag",
+      "approx_cost_usd": "$2.90 \u2013 $3.85 / kg",
+      "moq": "1,500 units / 200 kg",
+      "lead_time": "3\u20135 days (Stock) | 12\u201315 days (Custom)",
+      "sourcing_channels": [
+        "IndiaMART B2B Marketplace",
+        "TradeIndia B2B Portal",
+        "Local Regional Industrial Packaging Clusters"
+      ]
+    },
+    "material_durability": {
+      "virgin_material_shelf_life": "18 Months in dry warehouse conditions (15\u201328\u00b0C, RH < 65%)",
+      "packaged_product_protection_duration": "Guarantees 10 \u2013 20 Days shelf life protection under recommended storage climate",
+      "unfilled_storage_conditions": "Clean, dry warehouse, elevated on wooden pallets away from direct damp walls.",
+      "aging_failure_modes": "Surface tension drop affecting seal strength and potential polymer oxidation."
+    }
+  },
+  "disqualified_candidates": [
+    {
+      "id": "PKG_MET_PET_PE",
+      "short_name": "Metallized_PET_PE",
+      "name": "Metallized PET / Polyethylene Laminate",
+      "reasons": [
+        "STRICT DISQUALIFICATION: Living produce requires aerobic gas exchange; hermetic barrier causes anaerobic rot."
+      ]
+    },
+    {
+      "id": "PKG_AL_FOIL_LAM",
+      "short_name": "Aluminum_Foil_Laminate",
+      "name": "Aluminum Foil High-Barrier Laminate",
+      "reasons": [
+        "STRICT DISQUALIFICATION: Living produce requires aerobic gas exchange; hermetic barrier causes anaerobic rot."
+      ]
+    },
+    {
+      "id": "PKG_AL_LAMINATE",
+      "short_name": "Aluminum_Laminate",
+      "name": "High-Barrier Aluminum Laminate Pouch",
+      "reasons": [
+        "STRICT DISQUALIFICATION: Living produce requires aerobic gas exchange; hermetic barrier causes anaerobic rot."
+      ]
+    },
+    {
+      "id": "PKG_PA_PE_VACUUM",
+      "short_name": "PA_PE_Vacuum",
+      "name": "PA / PE Coextruded Vacuum Barrier Pouch",
+      "reasons": [
+        "STRICT DISQUALIFICATION: Living produce requires aerobic gas exchange; hermetic barrier causes anaerobic rot."
+      ]
+    }
+  ],
+  "confidence_assessment": {
+    "overall_confidence": "High",
+    "score_separation": 2.0,
+    "evidence_sources_count": 6,
+    "empirical_measurements_analyzed": 15,
+    "model_version": "v1.0-rf-grouped"
+  },
+  "disclaimer": "This system provides AI-assisted decision support grounded in published empirical packaging data. Physical shelf-life and sealing compatibility must be experimentally validated in accordance with FSSAI / ISO 22000 standards prior to commercial production."
+}

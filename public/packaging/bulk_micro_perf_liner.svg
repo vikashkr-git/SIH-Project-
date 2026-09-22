@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 280" fill="none">
+  <rect width="400" height="280" rx="16" fill="#0F172A"/>
+  <rect x="8" y="8" width="384" height="264" rx="12" fill="#1E293B" stroke="#334155" stroke-width="1.5"/>
+  <!-- Big Bulk Crate / Sack Outline (Badi Packing) -->
+  <rect x="100" y="45" width="200" height="150" rx="12" fill="#0D9488" fill-opacity="0.15" stroke="#0D9488" stroke-width="2.5"/>
+  <!-- Bulk Top Opening & Handles -->
+  <path d="M120 45 C120 35 280 35 280 45" stroke="#0D9488" stroke-width="3" stroke-linecap="round"/>
+  <line x1="100" y1="85" x2="300" y2="85" stroke="#0D9488" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <!-- Mesh / Perforation pattern -->
+  <circle cx="150" cy="115" r="3" fill="#0D9488"/>
+  <circle cx="175" cy="115" r="3" fill="#0D9488"/>
+  <circle cx="200" cy="115" r="3" fill="#0D9488"/>
+  <circle cx="225" cy="115" r="3" fill="#0D9488"/>
+  <circle cx="250" cy="115" r="3" fill="#0D9488"/>
+  <circle cx="162" cy="135" r="3" fill="#0D9488"/>
+  <circle cx="187" cy="135" r="3" fill="#0D9488"/>
+  <circle cx="212" cy="135" r="3" fill="#0D9488"/>
+  <circle cx="237" cy="135" r="3" fill="#0D9488"/>
+  <!-- 25-50 kg Capacity Badge -->
+  <rect x="145" y="155" width="110" height="26" rx="6" fill="#0F172A" stroke="#0D9488" stroke-width="1.5"/>
+  <text x="200" y="172" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="11" font-weight="bold">25 – 50 KG BULK PACK</text>
+  <!-- Labels -->
+  <text x="200" y="225" text-anchor="middle" fill="#FFFFFF" font-family="system-ui, sans-serif" font-size="13" font-weight="bold">Bulk Micro-Perforated Crate Liner (25-50 kg)</text>
+  <text x="200" y="248" text-anchor="middle" fill="#0D9488" font-family="system-ui, sans-serif" font-size="11" font-weight="600">Heavy-Duty 55µm Laser Vents</text>
+</svg>
