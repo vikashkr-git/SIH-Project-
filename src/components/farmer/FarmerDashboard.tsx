@@ -24,11 +24,13 @@ import {
 } from 'lucide-react';
 import { RecommendationResult, BatchRecord } from '../../types';
 import { INDIAN_CROPS_CATALOG, IndianCrop } from '../../data/indianCrops';
+import { calculateMandiDistance } from '../../data/mandiLocations';
 import { 
-  MAJOR_APMC_MANDIS, 
-  FARMER_SOURCE_REGIONS, 
-  calculateMandiDistance 
-} from '../../data/mandiLocations';
+  GeoLocationItem, 
+  EXTENDED_SOURCE_REGIONS, 
+  EXTENDED_APMC_MANDIS 
+} from '../../services/mandiGeocodingService';
+import { MandiRouteSelector } from './MandiRouteSelector';
 
 interface FarmerDashboardProps {
   onGenerateQR: (batch: Partial<BatchRecord>) => void;
@@ -65,9 +67,8 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
   const [storageFacility, setStorageFacility] = useState<'ambient_godown' | 'cold_storage'>('ambient_godown');
 
   // 5. If Mandi Sale: Farm Location & Destination Mandi
-  const [selectedSourceId, setSelectedSourceId] = useState<string>(FARMER_SOURCE_REGIONS[0].id);
-  const [selectedMandiId, setSelectedMandiId] = useState<string>(MAJOR_APMC_MANDIS[0].id);
-  const [customMandiName, setCustomMandiName] = useState<string>('');
+  const [sourceLocation, setSourceLocation] = useState<GeoLocationItem>(EXTENDED_SOURCE_REGIONS[0]);
+  const [destinationMandi, setDestinationMandi] = useState<GeoLocationItem>(EXTENDED_APMC_MANDIS[0]);
 
   // Selected crop details
   const selectedCrop = useMemo(() => {
@@ -83,15 +84,6 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
       return matchCat && matchSearch;
     });
   }, [cropCategoryFilter, cropSearchTerm]);
-
-  // Source and Mandi coordinate calculation
-  const sourceLocation = useMemo(() => {
-    return FARMER_SOURCE_REGIONS.find(s => s.id === selectedSourceId) || FARMER_SOURCE_REGIONS[0];
-  }, [selectedSourceId]);
-
-  const destinationMandi = useMemo(() => {
-    return MAJOR_APMC_MANDIS.find(m => m.id === selectedMandiId) || MAJOR_APMC_MANDIS[0];
-  }, [selectedMandiId]);
 
   // Automated Road Distance Calculation using Mandi Distance Engine
   const distanceInfo = useMemo(() => {
@@ -475,66 +467,15 @@ export const FarmerDashboard: React.FC<FarmerDashboardProps> = ({
             {/* 4. Sub-Questions for Mandi Sale (Map Distance & Mandi Selection) */}
             {farmerPurpose === 'sale' && (
               <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3 animate-fadeIn">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-black text-slate-900 dark:text-white flex items-center space-x-1.5">
-                    <Navigation className="w-3.5 h-3.5 text-emerald-600 dark:text-yellow-400" />
-                    <span>4. Kahan Se Kahan Le Jaana Hai? (Map Route)</span>
-                  </label>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-cyan-400/10 text-cyan-500 border border-cyan-400/20">
-                    GPS Distance Engine
-                  </span>
-                </div>
-
-                <div className="space-y-2">
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">
-                      Aapka Khet / Source Region
-                    </label>
-                    <select
-                      value={selectedSourceId}
-                      onChange={(e) => setSelectedSourceId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-100"
-                    >
-                      {FARMER_SOURCE_REGIONS.map(src => (
-                        <option key={src.id} value={src.id}>{src.name}</option>
-                      ))}
-                    </select>
-                  </div>
-
-                  <div>
-                    <label className="text-[11px] font-semibold text-slate-500 dark:text-slate-400 block mb-1">
-                      Destination Mandi / Wholesale Yard
-                    </label>
-                    <select
-                      value={selectedMandiId}
-                      onChange={(e) => setSelectedMandiId(e.target.value)}
-                      className="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-bold text-slate-800 dark:text-slate-100"
-                    >
-                      {MAJOR_APMC_MANDIS.map(mandi => (
-                        <option key={mandi.id} value={mandi.id}>{mandi.name} — {mandi.specialty}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* Map Distance Indicator Badge */}
-                <div className="p-3.5 bg-cyan-950/20 dark:bg-cyan-950/40 rounded-2xl border border-cyan-500/30 text-xs text-cyan-950 dark:text-cyan-200 space-y-1.5">
-                  <div className="flex items-center justify-between font-black">
-                    <span className="flex items-center space-x-1">
-                      <span>📍</span>
-                      <span>Measured Road Distance:</span>
-                    </span>
-                    <span className="text-base font-mono text-cyan-600 dark:text-cyan-400">
-                      {distanceInfo.distanceKm} KM
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-300">
-                    <span>Estimated Truck Travel: ~{distanceInfo.travelHours} Hours</span>
-                    <span className="font-bold text-emerald-600 dark:text-yellow-400">
-                      {distanceInfo.transitSeverity === 'Long_Distance' ? '⚠️ Heavy Transit Shocks' : '✓ Normal Haul'}
-                    </span>
-                  </div>
-                </div>
+                <MandiRouteSelector
+                  initialSource={sourceLocation}
+                  initialMandi={destinationMandi}
+                  compact={true}
+                  onRouteChange={(routeData) => {
+                    setSourceLocation(routeData.sourceLocation);
+                    setDestinationMandi(routeData.destinationMandi);
+                  }}
+                />
               </div>
             )}
 

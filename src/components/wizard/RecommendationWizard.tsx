@@ -32,11 +32,13 @@ import {
 import { calculateLocalRecommendation, getRecommendation, getPackagingPhotoUrl } from '../../services/recommendationEngine';
 import { FOODS_CATALOG } from '../../data/foodsCatalog';
 import { INDIAN_CROPS_CATALOG, IndianCrop } from '../../data/indianCrops';
+import { calculateMandiDistance } from '../../data/mandiLocations';
 import { 
-  MAJOR_APMC_MANDIS, 
-  FARMER_SOURCE_REGIONS, 
-  calculateMandiDistance 
-} from '../../data/mandiLocations';
+  GeoLocationItem, 
+  EXTENDED_SOURCE_REGIONS, 
+  EXTENDED_APMC_MANDIS 
+} from '../../services/mandiGeocodingService';
+import { MandiRouteSelector } from '../farmer/MandiRouteSelector';
 
 interface RecommendationWizardProps {
   initialRole?: UserRole;
@@ -83,8 +85,8 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
   const [weightUnit, setWeightUnit] = useState<'kg' | 'quintal'>('kg');
   const [weightInputValue, setWeightInputValue] = useState<number>(1000);
   const [farmerPurpose, setFarmerPurpose] = useState<'sale' | 'store'>('sale');
-  const [selectedSourceId, setSelectedSourceId] = useState<string>(FARMER_SOURCE_REGIONS[0].id);
-  const [selectedMandiId, setSelectedMandiId] = useState<string>(MAJOR_APMC_MANDIS[0].id);
+  const [sourceLocation, setSourceLocation] = useState<GeoLocationItem>(EXTENDED_SOURCE_REGIONS[0]);
+  const [destinationMandi, setDestinationMandi] = useState<GeoLocationItem>(EXTENDED_APMC_MANDIS[0]);
   const [storageDurationDays, setStorageDurationDays] = useState<number>(30);
   const [storageFacility, setStorageFacility] = useState<'ambient_godown' | 'cold_storage'>('ambient_godown');
 
@@ -97,15 +99,6 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
   const selectedIndianCrop = useMemo(() => {
     return INDIAN_CROPS_CATALOG.find(c => c.id === selectedCropId) || INDIAN_CROPS_CATALOG[0];
   }, [selectedCropId]);
-
-  // Source and Mandi coordinate calculation
-  const sourceLocation = useMemo(() => {
-    return FARMER_SOURCE_REGIONS.find(s => s.id === selectedSourceId) || FARMER_SOURCE_REGIONS[0];
-  }, [selectedSourceId]);
-
-  const destinationMandi = useMemo(() => {
-    return MAJOR_APMC_MANDIS.find(m => m.id === selectedMandiId) || MAJOR_APMC_MANDIS[0];
-  }, [selectedMandiId]);
 
   // Map Road Distance Calculation
   const distanceInfo = useMemo(() => {
@@ -1073,81 +1066,15 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
                 /* FARMER MAP DISTANCE FLOW */
                 <div className="space-y-5">
                   {farmerPurpose === 'sale' ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                      {/* Farm Source & Mandi Selectors */}
-                      <div className="bg-[#131B2E] border border-slate-800 rounded-2xl p-5 space-y-4">
-                        <div>
-                          <label className="text-xs font-bold text-slate-300 block mb-1">
-                            📍 Aapka Khet / Source Region
-                          </label>
-                          <select
-                            value={selectedSourceId}
-                            onChange={(e) => setSelectedSourceId(e.target.value)}
-                            className="w-full bg-[#0B0F19] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white"
-                          >
-                            {FARMER_SOURCE_REGIONS.map(src => (
-                              <option key={src.id} value={src.id}>{src.name}</option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="text-xs font-bold text-slate-300 block mb-1">
-                            🏛️ Destination Mandi / Wholesale Yard
-                          </label>
-                          <select
-                            value={selectedMandiId}
-                            onChange={(e) => setSelectedMandiId(e.target.value)}
-                            className="w-full bg-[#0B0F19] border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs font-bold text-white"
-                          >
-                            {MAJOR_APMC_MANDIS.map(mandi => (
-                              <option key={mandi.id} value={mandi.id}>{mandi.name} — {mandi.specialty}</option>
-                            ))}
-                          </select>
-                        </div>
-                      </div>
-
-                      {/* Map Engine Automated Measurement Readout */}
-                      <div className="bg-gradient-to-br from-[#131B2E] to-cyan-950/30 border-2 border-cyan-500/40 rounded-2xl p-5 space-y-4">
-                        <div className="flex items-center justify-between">
-                          <span className="text-xs font-black text-cyan-400 uppercase tracking-wider flex items-center space-x-1.5">
-                            <Navigation className="w-4 h-4" />
-                            <span>GPS Road Distance Engine</span>
-                          </span>
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-400/20 text-cyan-300 font-mono font-bold">
-                            Live Calibrated
-                          </span>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                          <div className="bg-[#0B0F19] p-3 rounded-xl border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block uppercase font-bold">Road Distance</span>
-                            <span className="text-2xl font-black text-white font-mono">{distanceInfo.distanceKm} KM</span>
-                          </div>
-                          <div className="bg-[#0B0F19] p-3 rounded-xl border border-slate-800">
-                            <span className="text-[10px] text-slate-400 block uppercase font-bold">Truck Travel</span>
-                            <span className="text-2xl font-black text-yellow-400 font-mono">~{distanceInfo.travelHours} Hours</span>
-                          </div>
-                        </div>
-
-                        <div className="p-3 bg-cyan-950/40 rounded-xl border border-cyan-500/20 text-xs text-cyan-200">
-                          {distanceInfo.distanceKm > 250 ? (
-                            <div className="space-y-1">
-                              <span className="font-bold text-yellow-400">⚠️ Long Distance Route ({distanceInfo.distanceKm} km &gt; 250 km):</span>
-                              <p className="text-[11px] text-slate-300">
-                                Highway vibrations aur stacking load ke karan fasal dabne ka risk hai. PackSmart AI ne <strong>heavy-duty shock-absorbing 5-ply cartons ya reinforced sacks</strong> configure kiye hain.
-                              </p>
-                            </div>
-                          ) : (
-                            <div className="space-y-1">
-                              <span className="font-bold text-emerald-400">✓ Local Mandi Route ({distanceInfo.distanceKm} km):</span>
-                              <p className="text-[11px] text-slate-300">
-                                4–6 ghante ki direct transit ke liye standard ventilated bori ya crate liners perfect hain.
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                    <div className="bg-[#131B2E] border border-slate-800 rounded-2xl p-5">
+                      <MandiRouteSelector
+                        initialSource={sourceLocation}
+                        initialMandi={destinationMandi}
+                        onRouteChange={(routeData) => {
+                          setSourceLocation(routeData.sourceLocation);
+                          setDestinationMandi(routeData.destinationMandi);
+                        }}
+                      />
                     </div>
                   ) : (
                     /* If Farmer Purpose is Store */
