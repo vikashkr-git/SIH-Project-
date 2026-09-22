@@ -139,6 +139,45 @@ export interface DisqualifiedCandidate {
   reasons: string[];
 }
 
+export type RiskLevel = 'Low' | 'Medium' | 'High';
+
+export interface SingleRiskItem {
+  risk_name: string;
+  level: RiskLevel;
+  explanation: string;
+}
+
+export interface FoodRiskAnalysis {
+  moisture_risk: SingleRiskItem;
+  oxidation_risk: SingleRiskItem;
+  respiration_risk: SingleRiskItem;
+  microbial_spoilage_risk: SingleRiskItem;
+  temperature_risk: SingleRiskItem;
+  transportation_risk: SingleRiskItem;
+  disclaimer: string;
+}
+
+export interface ShelfLifeAnalysis {
+  target_shelf_life_days: number;
+  model_estimated_shelf_life: string;
+  experimental_validation_status: string;
+  packaging_material_service_life: string;
+}
+
+export interface SustainabilityTradeOffs {
+  barrier_vs_shelf_life: string;
+  shelf_life_vs_material_usage: string;
+  material_vs_recyclability: string;
+  circularity_recommendation: string;
+}
+
+export interface DecisionPathwayStep {
+  step_number: number;
+  step_title: string;
+  input_evaluated: string;
+  decision_output: string;
+}
+
 export interface RecommendationResult {
   query_summary: {
     commodity: string;
@@ -184,6 +223,10 @@ export interface RecommendationResult {
       scientific_rationale: string;
     };
   };
+  food_risk_analysis?: FoodRiskAnalysis;
+  shelf_life_analysis?: ShelfLifeAnalysis;
+  sustainability_trade_offs?: SustainabilityTradeOffs;
+  decision_pathway?: DecisionPathwayStep[];
   top_recommendations: TopRecommendation[];
   sustainable_alternative?: TopRecommendation;
   disqualified_candidates: DisqualifiedCandidate[];

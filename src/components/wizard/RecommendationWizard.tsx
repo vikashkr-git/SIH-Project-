@@ -39,6 +39,11 @@ import {
   EXTENDED_APMC_MANDIS 
 } from '../../services/mandiGeocodingService';
 import { MandiRouteSelector } from '../farmer/MandiRouteSelector';
+import { FoodRiskAnalysisCard } from '../recommendation/FoodRiskAnalysisCard';
+import { ExplainabilityFlowCard } from '../recommendation/ExplainabilityFlowCard';
+import { SustainabilityTradeOffsCard } from '../recommendation/SustainabilityTradeOffsCard';
+import { ShelfLifeDistinctionCard } from '../recommendation/ShelfLifeDistinctionCard';
+import { InlineSourcingCard } from '../recommendation/InlineSourcingCard';
 
 interface RecommendationWizardProps {
   initialRole?: UserRole;
@@ -1914,6 +1919,21 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
                           <span>Build Laminate</span>
                         </button>
                       </div>
+                    </div>
+                  )}
+
+                  {/* Core Decision Support Analysis Suite */}
+                  {recResult && (
+                    <div className="space-y-6 pt-4 animate-fadeIn">
+                      <FoodRiskAnalysisCard riskAnalysis={recResult.food_risk_analysis} />
+                      <ExplainabilityFlowCard pathway={recResult.decision_pathway} />
+                      <ShelfLifeDistinctionCard shelfLife={recResult.shelf_life_analysis} />
+                      <SustainabilityTradeOffsCard 
+                        tradeOffs={recResult.sustainability_trade_offs} 
+                        activeRecommendation={activeProducerRec} 
+                        sustainableAlternative={recResult.sustainable_alternative} 
+                      />
+                      <InlineSourcingCard activeRecommendation={activeProducerRec} />
                     </div>
                   )}
                 </div>

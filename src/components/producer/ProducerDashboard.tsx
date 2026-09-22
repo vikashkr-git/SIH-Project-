@@ -39,6 +39,11 @@ import {
 import { RecommendationFormState, RecommendationResult, TopRecommendation } from '../../types';
 import { FOODS_CATALOG } from '../../data/foodsCatalog';
 import { getRecommendation, getPackagingPhotoUrl } from '../../services/recommendationEngine';
+import { FoodRiskAnalysisCard } from '../recommendation/FoodRiskAnalysisCard';
+import { ExplainabilityFlowCard } from '../recommendation/ExplainabilityFlowCard';
+import { SustainabilityTradeOffsCard } from '../recommendation/SustainabilityTradeOffsCard';
+import { ShelfLifeDistinctionCard } from '../recommendation/ShelfLifeDistinctionCard';
+import { InlineSourcingCard } from '../recommendation/InlineSourcingCard';
 
 interface ProducerDashboardProps {
   onOpenLaminate: () => void;
@@ -1157,46 +1162,7 @@ export const ProducerDashboard: React.FC<ProducerDashboardProps> = ({
                   {/* TAB 4: Sourcing & Local Availability */}
                   {activeTab === 'sourcing' && (
                     <div className="space-y-6">
-                      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">Estimated Roll / Film Cost</span>
-                          <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
-                            {activeRec.procurement_market.estimated_cost_per_kg_inr}
-                          </span>
-                          <span className="text-[11px] text-slate-500 block">{activeRec.procurement_market.approx_cost_usd}</span>
-                        </div>
-
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">Unit Pouch Cost</span>
-                          <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
-                            {activeRec.procurement_market.estimated_cost_per_pouch_inr}
-                          </span>
-                          <span className="text-[11px] text-slate-500 block">Finished pouch conversion</span>
-                        </div>
-
-                        <div className="p-4 rounded-xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700">
-                          <span className="text-[10px] font-bold uppercase text-slate-400 block">Minimum Order Qty (MOQ)</span>
-                          <span className="text-base font-bold font-mono text-slate-900 dark:text-white">
-                            {activeRec.procurement_market.moq}
-                          </span>
-                          <span className="text-[11px] text-slate-500 block">Lead time: {activeRec.procurement_market.lead_time}</span>
-                        </div>
-                      </div>
-
-                      <div className="p-4 rounded-xl bg-amber-50/60 dark:bg-amber-950/20 border border-amber-200 dark:border-amber-800 text-xs text-amber-800 dark:text-amber-300 flex items-start space-x-2">
-                        <Info className="w-4 h-4 flex-shrink-0 mt-0.5 text-amber-600" />
-                        <div>
-                          <strong>Live Supplier Verification Required:</strong> Prices, MOQs, and regional supply quantities vary by custom run specifications and film web widths.
-                        </div>
-                      </div>
-
-                      <button
-                        onClick={() => onOpenSourcing(`${activeRec.name} supplier near Delhi`)}
-                        className="px-4 py-2.5 rounded-xl bg-teal-600 text-white font-bold text-xs hover:bg-teal-500 transition-all flex items-center space-x-2 shadow-sm"
-                      >
-                        <Search className="w-4 h-4" />
-                        <span>Launch Sourcing Assistant for {activeRec.short_name}</span>
-                      </button>
+                      <InlineSourcingCard activeRecommendation={activeRec} />
                     </div>
                   )}
 
@@ -1229,6 +1195,21 @@ export const ProducerDashboard: React.FC<ProducerDashboardProps> = ({
 
                 </div>
               ))}
+
+              {/* Core Decision Support Analysis Suite */}
+              {recResult && (
+                <div className="space-y-6 pt-4 animate-fadeIn">
+                  <FoodRiskAnalysisCard riskAnalysis={recResult.food_risk_analysis} />
+                  <ExplainabilityFlowCard pathway={recResult.decision_pathway} />
+                  <ShelfLifeDistinctionCard shelfLife={recResult.shelf_life_analysis} />
+                  <SustainabilityTradeOffsCard 
+                    tradeOffs={recResult.sustainability_trade_offs} 
+                    activeRecommendation={activeRec} 
+                    sustainableAlternative={recResult.sustainable_alternative} 
+                  />
+                  <InlineSourcingCard activeRecommendation={activeRec} />
+                </div>
+              )}
             </>
           )}
         </div>

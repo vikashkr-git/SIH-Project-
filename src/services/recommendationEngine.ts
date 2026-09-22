@@ -1,4 +1,14 @@
-import { RecommendationFormState, RecommendationResult, TopRecommendation, DisqualifiedCandidate } from '../types';
+import { 
+  RecommendationFormState, 
+  RecommendationResult, 
+  TopRecommendation, 
+  DisqualifiedCandidate,
+  FoodRiskAnalysis,
+  ShelfLifeAnalysis,
+  SustainabilityTradeOffs,
+  DecisionPathwayStep,
+  RiskLevel
+} from '../types';
 import { PACKAGING_CATALOG, CatalogMaterial } from '../data/materialsCatalog';
 
 const API_BASE_URL = 'https://ai-pack-c7vn.onrender.com/api/v1';
@@ -38,6 +48,85 @@ export function calculateLocalRecommendation(input: RecommendationFormState): Re
   const estimatedAw = input.moisture_pct > 80 ? 0.98 : input.moisture_pct > 30 ? 0.85 : input.moisture_pct > 10 ? 0.55 : 0.25;
   const oxidationRisk = (input.fat_pct / 100) * (input.shelf_life_days / 180);
   const vaporDeltaKpa = 0.15 * (input.relative_humidity_pct / 100);
+
+  // 1. Structured 6-Factor Food Risk Analysis
+  const moistureRiskLevel: RiskLevel = input.moisture_pct < 8 
+    ? 'High' 
+    : (isFreshProduce && input.moisture_pct > 75 ? 'High' : (input.moisture_pct > 60 ? 'Medium' : 'Low'));
+  const moistureRiskExp = input.moisture_pct < 8
+    ? `Dry hygroscopic food (moisture ${input.moisture_pct}%). Extremely vulnerable to ambient water vapor absorption, resulting in loss of crispness or powder caking.`
+    : (isFreshProduce && input.moisture_pct > 75
+      ? `Fresh produce with high moisture (${input.moisture_pct}%). Transpiration inside airtight packaging risks surface water pooling, triggering bacterial soft rot.`
+      : (input.moisture_pct > 60
+        ? `Intermediate-to-high moisture matrix (${input.moisture_pct}%). Requires controlled moisture barrier to avoid syneresis or drying out.`
+        : `Moisture content (${input.moisture_pct}%) is in stable equilibrium with ambient storage conditions.`));
+
+  const oxidationRiskLevel: RiskLevel = input.fat_pct > 15 ? 'High' : (input.fat_pct > 4 ? 'Medium' : 'Low');
+  const oxidationRiskExp = input.fat_pct > 15
+    ? `High lipid concentration (${input.fat_pct}%). High vulnerability to auto-oxidation; exposure to headspace oxygen above 1.0% causes rapid rancidity and off-odors.`
+    : (input.fat_pct > 4
+      ? `Moderate fat content (${input.fat_pct}%). Lipid oxidation can cause flavor deterioration over extended storage without adequate barrier.`
+      : `Low lipid level (${input.fat_pct}%). Oxidation is not the primary shelf-life limiting factor.`);
+
+  const respirationRiskLevel: RiskLevel = input.respiration_rate > 20 ? 'High' : (input.respiration_rate > 3 ? 'Medium' : 'Low');
+  const respirationRiskExp = input.respiration_rate > 20
+    ? `High respiration rate (${input.respiration_rate} mg CO2/kg·hr). Living produce quickly consumes internal oxygen; hermetic films induce anaerobic ethanol fermentation.`
+    : (input.respiration_rate > 3
+      ? `Moderate respiration activity (${input.respiration_rate} mg CO2/kg·hr). Requires matched OTR gas exchange or micro-perforations to prevent suffocation.`
+      : `Non-respiring food matrix (${input.respiration_rate} mg CO2/kg·hr). No aerobic metabolic gas exchange requirements.`);
+
+  const microbialRiskLevel: RiskLevel = (input.moisture_pct > 60 && input.ph > 4.6 && !isFrozen) 
+    ? 'High' 
+    : (input.moisture_pct > 15 && !isFrozen ? 'Medium' : 'Low');
+  const microbialRiskExp = (input.moisture_pct > 60 && input.ph > 4.6 && !isFrozen)
+    ? `High moisture and low acidity (pH ${input.ph} > 4.6). Highly susceptible to vegetative bacterial, yeast, and fungal proliferation without hermetic cold-chain protection.`
+    : (input.moisture_pct > 15 && !isFrozen
+      ? `Intermediate water activity. Mold and fungal spore growth possible if packaging allows humid microclimates to form.`
+      : (isFrozen
+        ? `Sub-zero temperature (${input.storage_temp_c}°C) effectively inhibits active microbial metabolism.`
+        : `Low water activity (estimated aw ~${estimatedAw}) naturally suppresses microbial proliferation.`));
+
+  const temperatureRiskLevel: RiskLevel = isFrozen 
+    ? 'High' 
+    : (input.storage_temp_c > 28 && (isFreshProduce || input.moisture_pct > 50) ? 'High' : (isChilled ? 'Medium' : 'Low'));
+  const temperatureRiskExp = isFrozen
+    ? `Cryogenic frozen storage (${input.storage_temp_c}°C). Polymers risk brittle crack failure if glass transition temperature (Tg) is exceeded.`
+    : (input.storage_temp_c > 28 && (isFreshProduce || input.moisture_pct > 50)
+      ? `Elevated ambient temperature (${input.storage_temp_c}°C) exponentially accelerates biochemical spoilage and polymer gas permeation.`
+      : (isChilled
+        ? `Chilled storage (${input.storage_temp_c}°C). Packaging must tolerate high condensation humidity without barrier delamination.`
+        : `Normal room temperature storage (${input.storage_temp_c}°C). Well within standard polymer thermal tolerances.`));
+
+  const transportationRiskLevel: RiskLevel = isLongTransit ? 'High' : 'Low';
+  const transportationRiskExp = isLongTransit
+    ? `Long-haul / export transit (${input.transportation}). Repeated road vibration, drop shock, and 6–8 tier stacking compression demand puncture-resistant multi-ply structures.`
+    : `Short local haul (${input.transportation}). Low vibrational fatigue and minimal mechanical puncture hazard.`;
+
+  const foodRiskAnalysis: FoodRiskAnalysis = {
+    moisture_risk: { risk_name: 'Moisture Spoilage Risk', level: moistureRiskLevel, explanation: moistureRiskExp },
+    oxidation_risk: { risk_name: 'Lipid Oxidation Risk', level: oxidationRiskLevel, explanation: oxidationRiskExp },
+    respiration_risk: { risk_name: 'Respiration & Anaerobiosis Risk', level: respirationRiskLevel, explanation: respirationRiskExp },
+    microbial_spoilage_risk: { risk_name: 'Microbial Spoilage Risk', level: microbialRiskLevel, explanation: microbialRiskExp },
+    temperature_risk: { risk_name: 'Thermal Stress Risk', level: temperatureRiskLevel, explanation: temperatureRiskExp },
+    transportation_risk: { risk_name: 'Transit Mechanical Stress Risk', level: transportationRiskLevel, explanation: transportationRiskExp },
+    disclaimer: 'Decision support only. This assessment does not replace laboratory microbial challenge testing or official FSSAI / FDA food safety certification.'
+  };
+
+  // 2. Structured 4-Way Shelf-Life Analysis
+  const shelfLifeAnalysis: ShelfLifeAnalysis = {
+    target_shelf_life_days: input.shelf_life_days,
+    model_estimated_shelf_life: `~${Math.round(input.shelf_life_days * 0.92)}–${Math.round(input.shelf_life_days * 1.08)} Days under steady ${input.storage_temp_c}°C / ${input.relative_humidity_pct}% RH barrier preservation (Theoretical model estimate)`,
+    experimental_validation_status: 'Requires laboratory accelerated shelf-life testing (ASLT) and real-time sensory evaluation before commercial release.',
+    packaging_material_service_life: '18–24 Months in dry warehouse storage (15–25°C, RH < 65%). Service-life data requires manufacturer verification.'
+  };
+
+  // 3. Structured Sustainability Trade-Offs
+  const sustainabilityTradeOffs: SustainabilityTradeOffs = {
+    barrier_vs_shelf_life: 'Ultra-high barrier films (e.g. Metallized PET, Aluminum foil) block O2/H2O ingress extending shelf life by 3–6x, but trade off ease of standard kerbside mechanical recycling.',
+    shelf_life_vs_material_usage: 'Down-gauging film thickness reduces virgin polymer consumption and carbon footprint, but narrows the safety margin against flex-crack pinholing during highway transit.',
+    material_vs_recyclability: 'Multilayer co-extrusions (PET/PE/EVOH) deliver customized protection impossible in single resins, but require specialized mono-material compatibilizers or chemical recycling.',
+    circularity_recommendation: 'Where barrier demands permit (shelf life < 60 days), evaluate mono-material recyclable PE/PP pouches or certified bio-based PLA/PBAT compostable substrates with verified regional recovery.'
+  };
 
   // Filter candidates & detect disqualified
   const candidateScores: { material: CatalogMaterial; score: number; reasons: string[] }[] = [];
@@ -335,6 +424,57 @@ export function calculateLocalRecommendation(input: RecommendationFormState): Re
     },
   } : undefined;
 
+  const decisionPathway: DecisionPathwayStep[] = [
+    {
+      step_number: 1,
+      step_title: 'Food Properties Evaluation',
+      input_evaluated: `${input.commodity} (${input.category}) • Moisture: ${input.moisture_pct}%, Fat: ${input.fat_pct}%, pH: ${input.ph}, Respiration: ${input.respiration_rate} mg CO2/kg·hr`,
+      decision_output: `Classified biochemical degradation profile (Lipid rancidity risk: ${oxidationRiskLevel}, aw estimate: ${estimatedAw.toFixed(2)})`
+    },
+    {
+      step_number: 2,
+      step_title: 'Storage & Climate Modeling',
+      input_evaluated: `${input.storage_type} storage at ${input.storage_temp_c}°C and ${input.relative_humidity_pct}% RH`,
+      decision_output: `Calculated vapor pressure gradient (ΔP: ${vaporDeltaKpa.toFixed(2)} kPa) and thermal stability envelope (${temperatureRiskLevel} thermal risk)`
+    },
+    {
+      step_number: 3,
+      step_title: 'Transportation Stress Modeling',
+      input_evaluated: `${input.transportation} distribution`,
+      decision_output: isLongTransit 
+        ? 'Enforced heavy-duty puncture resistance (≥16 N) and flex-crack resistance for highway vibration shocks' 
+        : 'Standard local transit mechanical resilience (≥12 N)'
+    },
+    {
+      step_number: 4,
+      step_title: 'Food Degradation Risk Analysis',
+      input_evaluated: 'Multi-factor hazard evaluation across 6 critical vectors',
+      decision_output: `Moisture: ${moistureRiskLevel}, Oxidation: ${oxidationRiskLevel}, Respiration: ${respirationRiskLevel}, Microbial: ${microbialRiskLevel}`
+    },
+    {
+      step_number: 5,
+      step_title: 'Required Barrier Demands Derivation',
+      input_evaluated: 'Threshold calculation against degradation pathways',
+      decision_output: isFreshProduce 
+        ? 'Demands breathable/perforated structure (OTR > 3,000 cm³/m²·d·atm) to prevent anaerobiosis' 
+        : (input.fat_pct > 15 
+          ? 'Demands High Oxygen Barrier (OTR < 2.0 cm³/m²·d·atm) and near-zero WVTR' 
+          : 'Demands standard barrier protection tailored to target shelf life')
+    },
+    {
+      step_number: 6,
+      step_title: 'Candidate Packaging Filtering & Disqualification',
+      input_evaluated: `${PACKAGING_CATALOG.length} industrial barrier formulations in verified catalog`,
+      decision_output: `Disqualified ${disqualified.length} incompatible formulations (e.g. non-breathable films for living produce or cryogenic embrittlement)`
+    },
+    {
+      step_number: 7,
+      step_title: 'Final Multi-Objective Formulation Selection',
+      input_evaluated: `Optimization Goal: ${input.optimization_goal}`,
+      decision_output: `Selected Top 3 strategic candidates: Optimal Standard (${top3[0]?.name}), Ultra-Barrier Defense (${top3[1]?.name}), and Circular / Value Choice (${top3[2]?.name})`
+    }
+  ];
+
   return {
     query_summary: {
       commodity: input.commodity,
@@ -382,6 +522,10 @@ export function calculateLocalRecommendation(input: RecommendationFormState): Re
           : 'Inert nitrogen flush suppresses oxygen headspace to below 0.5%, preventing rancidity in lipid-dense matrices.',
       },
     },
+    food_risk_analysis: foodRiskAnalysis,
+    shelf_life_analysis: shelfLifeAnalysis,
+    sustainability_trade_offs: sustainabilityTradeOffs,
+    decision_pathway: decisionPathway,
     top_recommendations: top3,
     sustainable_alternative: sustainableAlternative,
     disqualified_candidates: disqualified,

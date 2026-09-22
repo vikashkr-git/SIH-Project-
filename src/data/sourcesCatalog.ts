@@ -72,5 +72,41 @@ export const SCIENTIFIC_SOURCES: ScientificSource[] = [
     "doi": "10.1520/D3985-17",
     "scope": "Standardized Coulometric sensor OTR measurement (23C, 0% RH) and Modulated Infrared WVTR measurement (38C, 90% RH)",
     "confidence_score": 0.99
+  },
+  {
+    "id": "SRC_TRANSMAT_2021",
+    "source_name": "TRANSMAT Gold Standard Permeability Database",
+    "title": "TRANSMAT: An open-access database of gas and water vapor permeabilities of food packaging polymers",
+    "authors": "Lentschat, C., et al.",
+    "year": 2021,
+    "publisher_or_journal": "Data in Brief 36, 107135",
+    "url": "https://doi.org/10.1016/j.dib.2021.107135",
+    "doi": "10.1016/j.dib.2021.107135",
+    "scope": "Curated experimental OTR, WVTR, and CO2 permeabilities under ISO/ASTM test conditions (Dataset DOI: 10.18167/DVN1/U7HK8J)",
+    "confidence_score": 0.99
+  },
+  {
+    "id": "SRC_YEH_TURAN_2026",
+    "source_name": "Yeh & Turan Shelf-Life & Kinetic Modeling",
+    "title": "Predictive packaging barrier modeling for perishable foods and dynamic respiration kinetics",
+    "authors": "Yeh, C.-Y., Turan, E.",
+    "year": 2026,
+    "publisher_or_journal": "npj Science of Food",
+    "url": "https://doi.org/10.1038/s41538-026-00741-7",
+    "doi": "10.1038/s41538-026-00741-7",
+    "scope": "Atmospheric gas exchange dynamics and respiration compensation points under modified atmosphere storage",
+    "confidence_score": 0.97
+  },
+  {
+    "id": "SRC_MAP_REVIEW_PMC7089433",
+    "source_name": "Modified Atmosphere Packaging Comprehensive Review",
+    "title": "Current Advances in Modified Atmosphere Packaging (MAP) for Perishable Food Products",
+    "authors": "National Center for Biotechnology Information (NCBI)",
+    "year": 2020,
+    "publisher_or_journal": "PMC7089433",
+    "url": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC7089433/",
+    "doi": "PMC7089433",
+    "scope": "Gas mixture optimization (O2, CO2, N2), microbial suppression thresholds, and film breathability matching",
+    "confidence_score": 0.96
   }
 ];
