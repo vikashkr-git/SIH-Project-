@@ -68,6 +68,8 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
   // Loading & Result States
   const [loading, setLoading] = useState(false);
   const [recResult, setRecResult] = useState<RecommendationResult | null>(null);
+  const [producerSelectedRank, setProducerSelectedRank] = useState<number>(1);
+  const [producerViewMode, setProducerViewMode] = useState<'dossier' | 'compare'>('dossier');
 
   // Smooth scroll to top when step changes
   React.useEffect(() => {
@@ -1566,121 +1568,430 @@ export const RecommendationWizard: React.FC<RecommendationWizardProps> = ({
             </div>
           ) : (
             /* ================================================================ */
-            /* STANDARD PRODUCER / EXPERT DOSSIER CARD                          */
+            /* FOOD PRODUCER / PROCESSOR: 3 OPTIONS & SIDE-BY-SIDE COMPARISON   */
             /* ================================================================ */
-            recResult && recResult.top_recommendations[0] && (
-              <div className="bg-[#131B2E] p-6 sm:p-8 rounded-3xl border-2 border-yellow-400/40 shadow-xl space-y-6">
-                <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-800">
-                  <div>
-                    <div className="flex items-center space-x-2">
-                      <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-yellow-400 text-slate-950">
-                        Top Match • Rank 1 Solution
-                      </span>
-                      <span className="text-xs text-slate-400 font-mono">
-                        {recResult.top_recommendations[0].category}
-                      </span>
-                    </div>
-                    <h3 className="text-2xl sm:text-3xl font-black text-white mt-2">
-                      {recResult.top_recommendations[0].name}
-                    </h3>
-                    <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
-                      Structure: <strong className="text-slate-200">{recResult.top_recommendations[0].structure}</strong>
-                    </p>
-                  </div>
+            recResult && recResult.top_recommendations.length > 0 && (() => {
+              const topRecs = recResult.top_recommendations;
+              const activeProducerRec = topRecs.find(r => r.rank === producerSelectedRank) || topRecs[0];
+              const bestOTR = Math.min(...topRecs.map(r => r.technical_specifications.otr_value));
+              const bestWVTR = Math.min(...topRecs.map(r => r.technical_specifications.wvtr_value));
+              const bestPuncture = Math.max(...topRecs.map(r => r.technical_specifications.puncture_resistance_n));
+              const bestTensile = Math.max(...topRecs.map(r => r.technical_specifications.tensile_strength_mpa));
+              const bestCostIndex = Math.min(...topRecs.map(r => r.sustainability_profile.relative_cost_index));
 
-                  <div className="text-right">
-                    <span className="text-[10px] font-bold uppercase text-slate-400 block">AI Match Score</span>
-                    <span className="text-3xl sm:text-4xl font-black text-yellow-400 font-mono">
-                      {recResult.top_recommendations[0].suitability_score} / 100
+              return (
+                <div className="space-y-6 animate-fadeIn">
+                  {/* Mode Switcher Bar */}
+                  <div className="flex flex-wrap items-center justify-between gap-3 p-2.5 bg-[#0B0F19] rounded-2xl border border-slate-800">
+                    <div className="flex items-center space-x-2">
+                      <button
+                        type="button"
+                        onClick={() => setProducerViewMode('dossier')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 ${
+                          producerViewMode === 'dossier'
+                            ? 'bg-teal-600 text-white shadow-md'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <FileText className="w-4 h-4 text-white" />
+                        <span>Specification Dossier (Rank {producerSelectedRank})</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setProducerViewMode('compare')}
+                        className={`px-4 py-2 rounded-xl text-xs font-bold transition-all flex items-center space-x-2 ${
+                          producerViewMode === 'compare'
+                            ? 'bg-teal-600 text-white shadow-md'
+                            : 'text-slate-400 hover:text-white hover:bg-slate-800'
+                        }`}
+                      >
+                        <Scale className="w-4 h-4 text-teal-400" />
+                        <span>Compare All 3 Formulations Side-by-Side</span>
+                        <span className="px-1.5 py-0.5 rounded text-[9px] bg-white/20 text-white font-mono uppercase tracking-wider">
+                          Green vs Red
+                        </span>
+                      </button>
+                    </div>
+
+                    <span className="text-xs text-slate-400 font-mono hidden sm:inline">
+                      {producerViewMode === 'compare' ? '⚡ Side-by-Side Benchmarking Active' : `Active: Rank ${producerSelectedRank} Choice`}
                     </span>
                   </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
-                  <div className="md:col-span-5 rounded-2xl bg-[#0B0F19] p-4 border border-slate-800 flex items-center justify-center shadow-inner">
-                    <img
-                      src={recResult.top_recommendations[0].sample_photo_url || getPackagingPhotoUrl(recResult.top_recommendations[0].short_name)}
-                      alt={recResult.top_recommendations[0].name}
-                      onError={(e) => {
-                        e.currentTarget.src = '/packaging/clear_barrier_pouch.jpg';
-                      }}
-                      className="h-48 object-contain rounded-xl"
-                    />
+                  {/* 3 Clickable Strategic Option Cards */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    {topRecs.map((rec) => {
+                      const isSelected = producerSelectedRank === rec.rank;
+                      const photoUrl = rec.sample_photo_url || getPackagingPhotoUrl(rec.short_name, selectedCropName);
+                      return (
+                        <div
+                          key={rec.id}
+                          onClick={() => setProducerSelectedRank(rec.rank)}
+                          className={`group p-4 rounded-2xl border-2 transition-all cursor-pointer flex flex-col justify-between relative overflow-hidden bg-[#131B2E] ${
+                            isSelected
+                              ? 'border-teal-400 shadow-[0_0_25px_rgba(20,184,166,0.3)] ring-2 ring-teal-500/20'
+                              : 'border-slate-800 hover:border-slate-700 hover:shadow-lg'
+                          }`}
+                        >
+                          <div className="space-y-3">
+                            {/* Rank Badge & Score */}
+                            <div className="flex items-center justify-between">
+                              <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                rec.rank === 1 ? 'bg-teal-500 text-slate-950' : rec.rank === 2 ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+                              }`}>
+                                {rec.rank === 1 ? '🌟 Rank 1 Choice' : rec.rank === 2 ? '🛡️ Rank 2 Choice' : '🌿 Rank 3 Choice'}
+                              </span>
+                              <span className="font-mono text-xs font-black text-teal-400">
+                                {rec.suitability_score} / 100
+                              </span>
+                            </div>
+
+                            {/* Archetype subtitle */}
+                            <div className="text-[11px] font-bold text-teal-300">
+                              {rec.archetype || (rec.rank === 1 ? 'Optimal Standard Solution' : rec.rank === 2 ? 'Ultra-Barrier Defense' : 'Sustainable / Value Alternative')}
+                            </div>
+
+                            {/* Physical Photo */}
+                            <div className="h-36 w-full rounded-xl bg-[#0B0F19] p-2 border border-slate-800 flex items-center justify-center overflow-hidden relative group-hover:border-teal-500/40 transition-colors">
+                              <img
+                                src={photoUrl}
+                                alt={rec.name}
+                                onError={(e) => { e.currentTarget.src = '/packaging/clear_barrier_pouch.jpg'; }}
+                                className="h-32 w-full object-contain group-hover:scale-105 transition-transform duration-300"
+                              />
+                              <span className="absolute bottom-1.5 right-1.5 px-1.5 py-0.5 rounded bg-black/80 text-[9px] font-mono text-slate-300">
+                                {rec.technical_specifications.thickness_um} µm
+                              </span>
+                            </div>
+
+                            {/* Material Name & Structure */}
+                            <div>
+                              <h4 className="font-extrabold text-white text-xs line-clamp-2 group-hover:text-teal-400 transition-colors">
+                                {rec.name}
+                              </h4>
+                              <p className="text-[11px] text-slate-400 mt-1 font-mono line-clamp-1">
+                                {rec.structure}
+                              </p>
+                            </div>
+
+                            {/* Key specs */}
+                            <div className="grid grid-cols-2 gap-1.5 pt-1 text-[10px] font-mono">
+                              <div className="p-1.5 rounded-lg bg-[#0B0F19] border border-slate-800 text-slate-300">
+                                <span className="text-slate-400 block text-[9px]">OTR Barrier</span>
+                                <strong className="text-teal-400">{rec.technical_specifications.otr_value}</strong>
+                              </div>
+                              <div className="p-1.5 rounded-lg bg-[#0B0F19] border border-slate-800 text-slate-300">
+                                <span className="text-slate-400 block text-[9px]">WVTR Barrier</span>
+                                <strong className="text-teal-400">{rec.technical_specifications.wvtr_value}</strong>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Footer Indicator */}
+                          <div className="mt-3 pt-2.5 border-t border-slate-800 flex items-center justify-between text-[11px] font-bold text-teal-400">
+                            <span>{isSelected ? '✓ Active Formulation' : 'Select Solution'}</span>
+                            <ArrowRight className={`w-3.5 h-3.5 transform transition-transform ${isSelected ? 'translate-x-1' : ''}`} />
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
 
-                  <div className="md:col-span-7 grid grid-cols-2 gap-3">
-                    <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Thickness</span>
-                      <span className="text-lg font-bold font-mono text-white">
-                        {recResult.top_recommendations[0].technical_specifications.thickness_um} µm
-                      </span>
-                    </div>
+                  {/* COMPARISON VIEW VS DOSSIER VIEW */}
+                  {producerViewMode === 'compare' ? (
+                    /* 3-WAY COMPARISON GRID */
+                    <div className="space-y-6">
+                      <div className="bg-[#0B0F19] border border-teal-500/30 rounded-2xl p-4 text-xs text-slate-300 flex items-center justify-between">
+                        <div className="flex items-center space-x-2">
+                          <Scale className="w-4 h-4 text-teal-400 flex-shrink-0" />
+                          <span>Strict Green vs Red Benchmarking: Superior parameters highlighted in <strong className="text-emerald-400 font-bold">BOLD GREEN</strong> and weaker parameters in <strong className="text-rose-400 font-bold">BOLD RED</strong>.</span>
+                        </div>
+                      </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Oxygen Transmission (OTR)</span>
-                      <span className="text-lg font-bold font-mono text-cyan-400">
-                        {recResult.top_recommendations[0].technical_specifications.otr_value}
-                      </span>
-                    </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {topRecs.map((mat, mIdx) => {
+                          const photoUrl = mat.sample_photo_url || getPackagingPhotoUrl(mat.short_name, selectedCropName);
+                          const isBestOTR = mat.technical_specifications.otr_value === bestOTR;
+                          const isBestWVTR = mat.technical_specifications.wvtr_value === bestWVTR;
+                          const isBestPuncture = mat.technical_specifications.puncture_resistance_n === bestPuncture;
+                          const isBestTensile = mat.technical_specifications.tensile_strength_mpa === bestTensile;
+                          const isBestCost = mat.sustainability_profile.relative_cost_index === bestCostIndex;
+                          const isEcoFriendly = (mat.sustainability_profile.bio_based_pct > 0 || mat.sustainability_profile.recyclability_class.includes('High') || mat.sustainability_profile.compostable);
 
-                    <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Water Vapor (WVTR)</span>
-                      <span className="text-lg font-bold font-mono text-cyan-400">
-                        {recResult.top_recommendations[0].technical_specifications.wvtr_value}
-                      </span>
-                    </div>
+                          return (
+                            <div
+                              key={mat.id}
+                              className={`bg-[#131B2E] border-2 rounded-3xl p-5 space-y-4 shadow-xl flex flex-col justify-between ${
+                                producerSelectedRank === mat.rank ? 'border-teal-400 shadow-[0_0_20px_rgba(20,184,166,0.25)]' : 'border-slate-800'
+                              }`}
+                            >
+                              <div className="space-y-3">
+                                <div className="flex items-center justify-between">
+                                  <span className={`px-2.5 py-1 rounded-full text-[10px] font-black uppercase tracking-wider ${
+                                    mat.rank === 1 ? 'bg-teal-500 text-slate-950' : mat.rank === 2 ? 'bg-blue-600 text-white' : 'bg-emerald-600 text-white'
+                                  }`}>
+                                    Candidate {mIdx === 0 ? 'A (Rank 1)' : mIdx === 1 ? 'B (Rank 2)' : 'C (Rank 3)'}
+                                  </span>
+                                  <span className="font-mono text-xs font-bold text-teal-400">
+                                    {mat.suitability_score} / 100
+                                  </span>
+                                </div>
 
-                    <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
-                      <span className="text-[10px] font-bold uppercase text-slate-400 block">Recyclability</span>
-                      <span className="text-sm font-bold text-white truncate block">
-                        {recResult.top_recommendations[0].sustainability_profile.recyclability_stream}
-                      </span>
+                                <div className="h-40 rounded-2xl bg-[#0B0F19] p-2 flex items-center justify-center border border-slate-800 overflow-hidden">
+                                  <img
+                                    src={photoUrl}
+                                    alt={mat.name}
+                                    onError={(e) => { e.currentTarget.src = '/packaging/clear_barrier_pouch.jpg'; }}
+                                    className="h-36 w-full object-contain rounded-xl"
+                                  />
+                                </div>
+
+                                <div>
+                                  <h3 className="text-base font-extrabold text-white line-clamp-1">{mat.name}</h3>
+                                  <span className="text-xs font-mono text-slate-400 block mt-0.5 line-clamp-1">{mat.structure}</span>
+                                </div>
+                              </div>
+
+                              {/* Strict Green vs Red Metrics */}
+                              <div className="space-y-2.5 pt-3 border-t border-slate-800 text-xs">
+                                {/* OTR */}
+                                <div className={`p-2.5 rounded-xl border ${isBestOTR ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-rose-950/20 border-rose-500/30'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Oxygen (OTR)</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isBestOTR ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {isBestOTR ? '✓ BEST BARRIER' : '✗ WEAKER'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-base font-mono font-black mt-0.5 ${isBestOTR ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {mat.technical_specifications.otr_value} <span className="text-xs font-normal text-slate-400">cm³/(m²·d·atm)</span>
+                                  </div>
+                                </div>
+
+                                {/* WVTR */}
+                                <div className={`p-2.5 rounded-xl border ${isBestWVTR ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-rose-950/20 border-rose-500/30'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Moisture (WVTR)</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isBestWVTR ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {isBestWVTR ? '✓ BEST BARRIER' : '✗ WEAKER'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-base font-mono font-black mt-0.5 ${isBestWVTR ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {mat.technical_specifications.wvtr_value} <span className="text-xs font-normal text-slate-400">g/(m²·day)</span>
+                                  </div>
+                                </div>
+
+                                {/* Puncture */}
+                                <div className={`p-2.5 rounded-xl border ${isBestPuncture ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-rose-950/20 border-rose-500/30'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Puncture Force</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isBestPuncture ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {isBestPuncture ? '✓ STRONGEST' : '✗ LOWER FORCE'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-base font-mono font-black mt-0.5 ${isBestPuncture ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {mat.technical_specifications.puncture_resistance_n} <span className="text-xs font-normal text-slate-400">N</span>
+                                  </div>
+                                </div>
+
+                                {/* Tensile */}
+                                <div className={`p-2.5 rounded-xl border ${isBestTensile ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-rose-950/20 border-rose-500/30'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Tensile Strength</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isBestTensile ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {isBestTensile ? '✓ STRONGEST' : '✗ LOWER'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-base font-mono font-black mt-0.5 ${isBestTensile ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    {mat.technical_specifications.tensile_strength_mpa} <span className="text-xs font-normal text-slate-400">MPa</span>
+                                  </div>
+                                </div>
+
+                                {/* Cost Index */}
+                                <div className={`p-2.5 rounded-xl border ${isBestCost ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-rose-950/20 border-rose-500/30'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Cost Economy</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isBestCost ? 'bg-emerald-500 text-slate-950' : 'bg-rose-500/20 text-rose-400'}`}>
+                                      {isBestCost ? '✓ LOWER EXPENSE' : '✗ HIGHER COST'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-sm font-mono font-black mt-0.5 ${isBestCost ? 'text-emerald-400' : 'text-rose-400'}`}>
+                                    Index {mat.sustainability_profile.relative_cost_index} • {mat.procurement_market.estimated_cost_per_pouch_inr}
+                                  </div>
+                                </div>
+
+                                {/* Circularity */}
+                                <div className={`p-2.5 rounded-xl border ${isEcoFriendly ? 'bg-emerald-950/40 border-emerald-500/60' : 'bg-[#0B0F19] border-slate-800'}`}>
+                                  <div className="flex items-center justify-between text-[10px]">
+                                    <span className="text-slate-400 uppercase font-bold">Circularity</span>
+                                    <span className={`font-black px-1.5 py-0.5 rounded ${isEcoFriendly ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'}`}>
+                                      {isEcoFriendly ? '✓ ECO CIRCULAR' : 'CONVENTIONAL'}
+                                    </span>
+                                  </div>
+                                  <div className={`text-xs font-bold mt-0.5 ${isEcoFriendly ? 'text-emerald-400' : 'text-slate-300'}`}>
+                                    {mat.sustainability_profile.recyclability_stream}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Action to adopt */}
+                              <div className="pt-3 border-t border-slate-800">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setProducerSelectedRank(mat.rank);
+                                    setProducerViewMode('dossier');
+                                  }}
+                                  className={`w-full py-2.5 rounded-xl text-xs font-bold transition-all flex items-center justify-center space-x-1.5 ${
+                                    producerSelectedRank === mat.rank
+                                      ? 'bg-teal-600 text-white'
+                                      : 'bg-slate-800 hover:bg-slate-700 text-slate-200'
+                                  }`}
+                                >
+                                  <span>{producerSelectedRank === mat.rank ? '✓ Selected — View Dossier' : 'Adopt & View Dossier'}</span>
+                                  <ArrowRight className="w-3.5 h-3.5" />
+                                </button>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
                     </div>
-                  </div>
+                  ) : (
+                    /* DOSSIER VIEW FOR SELECTED CANDIDATE */
+                    <div className="bg-[#131B2E] p-6 sm:p-8 rounded-3xl border-2 border-teal-500/40 shadow-xl space-y-6">
+                      <div className="flex flex-wrap items-start justify-between gap-4 pb-4 border-b border-slate-800">
+                        <div>
+                          <div className="flex items-center space-x-2">
+                            <span className="px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider bg-teal-500 text-slate-950">
+                              Rank {activeProducerRec.rank} Choice • {activeProducerRec.archetype || 'Optimal Standard Solution'}
+                            </span>
+                            <span className="text-xs text-slate-400 font-mono">
+                              {activeProducerRec.category}
+                            </span>
+                          </div>
+                          <h3 className="text-2xl sm:text-3xl font-black text-white mt-2">
+                            {activeProducerRec.name}
+                          </h3>
+                          <p className="text-xs sm:text-sm text-slate-400 font-medium mt-1">
+                            Structure: <strong className="text-slate-200">{activeProducerRec.structure}</strong>
+                          </p>
+                        </div>
+
+                        <div className="flex items-center space-x-3">
+                          <button
+                            type="button"
+                            onClick={() => setProducerViewMode('compare')}
+                            className="px-3.5 py-2 rounded-xl bg-teal-600/20 border border-teal-500/40 text-teal-300 text-xs font-bold hover:bg-teal-600/30 flex items-center space-x-1.5"
+                          >
+                            <Scale className="w-4 h-4 text-teal-400" />
+                            <span>Compare All 3 Formulations</span>
+                          </button>
+                          <div className="text-right">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 block">AI Match Score</span>
+                            <span className="text-3xl sm:text-4xl font-black text-teal-400 font-mono">
+                              {activeProducerRec.suitability_score} / 100
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center">
+                        <div className="md:col-span-5 rounded-2xl bg-[#0B0F19] p-4 border border-slate-800 flex items-center justify-center shadow-inner">
+                          <img
+                            src={activeProducerRec.sample_photo_url || getPackagingPhotoUrl(activeProducerRec.short_name, selectedCropName)}
+                            alt={activeProducerRec.name}
+                            onError={(e) => {
+                              e.currentTarget.src = '/packaging/clear_barrier_pouch.jpg';
+                            }}
+                            className="h-48 object-contain rounded-xl"
+                          />
+                        </div>
+
+                        <div className="md:col-span-7 grid grid-cols-2 gap-3">
+                          <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Thickness</span>
+                            <span className="text-lg font-bold font-mono text-white">
+                              {activeProducerRec.technical_specifications.thickness_um} µm
+                            </span>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Oxygen Transmission (OTR)</span>
+                            <span className="text-lg font-bold font-mono text-teal-400">
+                              {activeProducerRec.technical_specifications.otr_value}
+                            </span>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Water Vapor (WVTR)</span>
+                            <span className="text-lg font-bold font-mono text-teal-400">
+                              {activeProducerRec.technical_specifications.wvtr_value}
+                            </span>
+                          </div>
+
+                          <div className="p-3.5 rounded-xl bg-[#0B0F19] border border-slate-800">
+                            <span className="text-[10px] font-bold uppercase text-slate-400 block">Recyclability</span>
+                            <span className="text-sm font-bold text-white truncate block">
+                              {activeProducerRec.sustainability_profile.recyclability_stream}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="pt-2 flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            onGenerateQR({
+                              commodity: recResult.query_summary.commodity,
+                              packaging_id: activeProducerRec.id,
+                              packaging_name: activeProducerRec.name,
+                              packaging_structure: activeProducerRec.structure,
+                              thickness_um: activeProducerRec.technical_specifications.thickness_um,
+                              quantity_kg: 500,
+                              farm_or_facility_name: 'Packaging Facility',
+                              location: 'Industrial Plant',
+                            });
+                          }}
+                          className="px-5 py-2.5 rounded-xl bg-teal-500 text-slate-950 font-black text-xs hover:bg-teal-400 transition-all flex items-center space-x-2 shadow-[0_0_15px_rgba(20,184,166,0.25)]"
+                        >
+                          <QrCode className="w-4 h-4" />
+                          <span>Generate QR Batch Label</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => onDownloadReport(recResult)}
+                          className="px-4 py-2.5 rounded-xl bg-[#0B0F19] border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition-colors flex items-center space-x-1.5"
+                        >
+                          <FileText className="w-4 h-4 text-teal-400" />
+                          <span>Download Specification PDF</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={() => onFindSourcing(activeProducerRec.name)}
+                          className="px-4 py-2.5 rounded-xl bg-[#0B0F19] border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition-colors flex items-center space-x-1.5"
+                        >
+                          <Search className="w-4 h-4 text-teal-400" />
+                          <span>Find Suppliers</span>
+                        </button>
+
+                        <button
+                          type="button"
+                          onClick={onOpenLaminate}
+                          className="px-4 py-2.5 rounded-xl bg-[#0B0F19] border border-slate-700 text-xs font-bold text-slate-300 hover:text-white flex items-center space-x-1.5"
+                        >
+                          <Layers className="w-4 h-4 text-teal-400" />
+                          <span>Build Laminate</span>
+                        </button>
+                      </div>
+                    </div>
+                  )}
                 </div>
-
-                <div className="pt-2 flex flex-wrap items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const rec = recResult.top_recommendations[0];
-                      onGenerateQR({
-                        commodity: recResult.query_summary.commodity,
-                        packaging_id: rec.id,
-                        packaging_name: rec.name,
-                        packaging_structure: rec.structure,
-                        thickness_um: rec.technical_specifications.thickness_um,
-                        quantity_kg: 500,
-                        farm_or_facility_name: 'Packaging Facility',
-                        location: 'Industrial Plant',
-                      });
-                    }}
-                    className="px-5 py-2.5 rounded-xl bg-[#FACC15] text-slate-950 font-black text-xs hover:bg-yellow-300 transition-all flex items-center space-x-2 shadow-[0_0_15px_rgba(250,204,21,0.25)]"
-                  >
-                    <QrCode className="w-4 h-4" />
-                    <span>Generate QR Batch Label</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onDownloadReport(recResult)}
-                    className="px-4 py-2.5 rounded-xl bg-[#0B0F19] border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition-colors flex items-center space-x-1.5"
-                  >
-                    <FileText className="w-4 h-4 text-cyan-400" />
-                    <span>Download Specification PDF</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => onFindSourcing(recResult.top_recommendations[0].name)}
-                    className="px-4 py-2.5 rounded-xl bg-[#0B0F19] border border-slate-700 text-xs font-bold text-white hover:bg-slate-800 transition-colors flex items-center space-x-1.5"
-                  >
-                    <Search className="w-4 h-4 text-yellow-400" />
-                    <span>Find Suppliers</span>
-                  </button>
-                </div>
-              </div>
-            )
+              );
+            })()
           )}
 
         </div>

@@ -106,6 +106,8 @@ export interface RecommendationExplanation {
 
 export interface TopRecommendation {
   rank: number;
+  archetype?: string;
+  archetype_desc?: string;
   id: string;
   short_name: string;
   name: string;

@@ -150,13 +150,44 @@ export function calculateLocalRecommendation(input: RecommendationFormState): Re
     candidateScores.push({ material: mat, score: finalScore, reasons });
   }
 
-  // Sort candidates by score descending
-  candidateScores.sort((a, b) => b.score - a.score);
+  // Select 3 distinct solutions representing 3 strategic archetypes:
+  // 1. Candidate 1: The Top Ranked Optimal Specification
+  const cand1 = candidateScores[0];
 
-  const top3 = candidateScores.slice(0, 3).map((item, idx): TopRecommendation => {
+  // 2. Candidate 2: Ultra-Barrier / High Protection Choice (distinct from cand1)
+  const cand2 = candidateScores.find(c => c.material.id !== cand1.material.id && (c.material.otr_value < cand1.material.otr_value || c.material.puncture_resistance_n > cand1.material.puncture_resistance_n || c.material.category.includes('Foil') || c.material.category.includes('Barrier'))) || candidateScores[1] || candidateScores[0];
+
+  // 3. Candidate 3: Sustainable Circular or Economic Value Choice (distinct from cand1 and cand2)
+  const cand3 = candidateScores.find(c => c.material.id !== cand1.material.id && c.material.id !== cand2.material.id && (c.material.bio_based_pct > 0 || c.material.compostable || c.material.short_name.includes('Circular') || c.material.cost_index_relative <= 1.0)) || candidateScores.find(c => c.material.id !== cand1.material.id && c.material.id !== cand2.material.id) || candidateScores[2] || candidateScores[1] || candidateScores[0];
+
+  const selectedCandidates = [
+    { 
+      item: cand1, 
+      rank: 1, 
+      archetype: 'Optimal Standard Solution', 
+      archetype_desc: 'Prime balanced specification matching proximate moisture, fat, and targeted shelf life.' 
+    },
+    { 
+      item: cand2, 
+      rank: 2, 
+      archetype: 'Ultra-Barrier Defense', 
+      archetype_desc: 'Maximum gas & vapor preservation barrier engineered for extreme climates and extended distribution.' 
+    },
+    { 
+      item: cand3, 
+      rank: 3, 
+      archetype: (cand3.material.bio_based_pct > 0 || cand3.material.compostable || cand3.material.short_name.includes('Circular')) ? 'Sustainable Circular Option' : 'Economic Value Alternative', 
+      archetype_desc: (cand3.material.bio_based_pct > 0 || cand3.material.compostable || cand3.material.short_name.includes('Circular')) ? 'Eco-certified polymer promoting lower carbon footprint and EPR compliance.' : 'Cost-efficient mass distribution structure optimized for high throughput.' 
+    }
+  ];
+
+  const top3 = selectedCandidates.map((entry): TopRecommendation => {
+    const item = entry.item;
     const mat = item.material;
     return {
-      rank: idx + 1,
+      rank: entry.rank,
+      archetype: entry.archetype,
+      archetype_desc: entry.archetype_desc,
       id: mat.id,
       short_name: mat.short_name,
       name: mat.name,
@@ -369,26 +400,32 @@ export function getPackagingPhotoUrl(shortName: string, commodity?: string): str
   const sn = (shortName || '').toLowerCase();
   const c = (commodity || '').toLowerCase();
 
-  // 1. Bulk agricultural sacks & crate liners
-  if (sn.includes('leno') || sn.includes('mesh')) return '/packaging/bulk_leno_sack.jpg';
-  if (sn.includes('perf_liner') || sn.includes('crate_liner') || sn.includes('micro_perforated_pe')) return '/packaging/bulk_micro_perf_liner.jpg';
-  if (sn.includes('corrugated') || sn.includes('box') || sn.includes('master_shipper') || sn.includes('carton')) return '/packaging/heavy_duty_corrugated_master.jpg';
-  if (sn.includes('hdpe_woven') || sn.includes('woven_sack') || sn.includes('katta')) return '/packaging/hdpe_woven.jpg';
-
-  // 2. Multilayer barrier & industrial pouches
-  if (sn.includes('met_pet') || sn.includes('metallized') || sn.includes('snack') || c.includes('chip')) return '/packaging/metallized_pet_pe.jpg';
-  if (sn.includes('aluminum') || sn.includes('foil') || sn.includes('powder') || c.includes('powder')) return '/packaging/aluminum_foil_laminate.jpg';
-  if (sn.includes('vacuum') || sn.includes('pa_pe') || sn.includes('cheese') || sn.includes('meat') || c.includes('fish') || c.includes('meat')) return '/packaging/pa_pe_vacuum.jpg';
-  if (sn.includes('evoh') || sn.includes('barrier_laminate')) return '/packaging/high_barrier_evoh.jpg';
-  if (sn.includes('frozen') || sn.includes('subzero')) return '/packaging/frozen_pe_film.jpg';
-  if (sn.includes('bio') || sn.includes('pla') || sn.includes('compostable')) return '/packaging/bio_compostable_pla.jpg';
+  // 1. Material-specific matches FIRST (so each distinct material gets its own proper image)
+  if (sn.includes('met_pet') || sn.includes('metallized')) return '/packaging/metallized_pet_pe.jpg';
+  if (sn.includes('al_foil') || sn.includes('aluminum_foil') || sn.includes('foil_lam')) return '/packaging/aluminum_foil_laminate.jpg';
+  if (sn.includes('al_laminate') || (sn.includes('aluminum') && !sn.includes('cup'))) return '/packaging/milk_powder_foil.jpg';
+  if (sn.includes('evoh') || sn.includes('high_barrier_lam') || sn.includes('barrier_laminate')) return '/packaging/high_barrier_evoh.jpg';
+  if (sn.includes('bio') || sn.includes('pla') || sn.includes('pbat') || sn.includes('compostable')) return '/packaging/bio_compostable_pla.jpg';
+  if (sn.includes('rpet') || sn.includes('circular') || sn.includes('recycled')) return '/packaging/clear_barrier_pouch.jpg';
   if (sn.includes('bopp') || sn.includes('flowwrap')) return '/packaging/bopp_pe_flowwrap.jpg';
-  if (sn.includes('breathable') || sn.includes('produce') || c.includes('tomato') || c.includes('mango')) return '/packaging/micro_perf_produce.jpg';
+  if (sn.includes('frozen') || sn.includes('subzero')) return '/packaging/frozen_pe_film.jpg';
+  if (sn.includes('vacuum') || sn.includes('pa_pe') || sn.includes('nylon')) return '/packaging/pa_pe_vacuum.jpg';
+  if (sn.includes('cup') || sn.includes('pp_cup')) return '/packaging/dairy_cheese_vacuum.jpg';
+  if (sn.includes('micro_perf') || sn.includes('perf_produce') || sn.includes('breathable')) return '/packaging/micro_perf_produce.jpg';
+  if (sn.includes('leno') || sn.includes('mesh')) return '/packaging/bulk_leno_sack.jpg';
+  if (sn.includes('hdpe_woven') || sn.includes('woven_sack') || sn.includes('katta')) return '/packaging/hdpe_woven.jpg';
+  if (sn.includes('perf_liner') || sn.includes('crate_liner')) return '/packaging/bulk_micro_perf_liner.jpg';
+  if (sn.includes('corrugated') || sn.includes('master_shipper') || sn.includes('box') || sn.includes('carton')) return '/packaging/heavy_duty_corrugated_master.jpg';
   if (sn.includes('ldpe') || sn.includes('pe_film') || sn.includes('bag')) return '/packaging/ldpe_bag.jpg';
 
-  // 3. Fallback based on commodity context
+  // 2. Fallback based on commodity context ONLY when material is non-specific
+  if (c.includes('chip') || c.includes('snack')) return '/packaging/metallized_pet_pe.jpg';
+  if (c.includes('powder') || c.includes('coffee') || c.includes('tea')) return '/packaging/aluminum_foil_laminate.jpg';
+  if (c.includes('cheese') || c.includes('meat') || c.includes('fish')) return '/packaging/pa_pe_vacuum.jpg';
+  if (c.includes('frozen') || c.includes('pea')) return '/packaging/frozen_pe_film.jpg';
+  if (c.includes('tomato') || c.includes('mango') || c.includes('fruit') || c.includes('produce')) return '/packaging/micro_perf_produce.jpg';
   if (c.includes('potato') || c.includes('onion') || c.includes('garlic')) return '/packaging/bulk_leno_sack.jpg';
-  if (c.includes('wheat') || c.includes('rice') || c.includes('dal') || c.includes('pulse')) return '/packaging/hdpe_woven.jpg';
+  if (c.includes('wheat') || c.includes('rice') || c.includes('grain') || c.includes('dal')) return '/packaging/hdpe_woven.jpg';
 
   return '/packaging/clear_barrier_pouch.jpg';
 }
